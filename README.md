@@ -1,1 +1,1 @@
-The Secret Formula :tm: will appear shortly.
+The Secret Formula™ will appear shortly.
