@@ -1,8 +1,9 @@
-# TODO: improve config
+# TODO: improve imports style
+# TODO: build docker image
 # TODO: implement commands
 # TODO: implement admin notification
 # TODO: better logging
-# TODO: think about attachments
+# TODO: think about handling attachments
 # FIXME: comment the code (an everlasting problem)
 
 import traceback
@@ -43,5 +44,6 @@ g.bot.use(
 
 # App entrypoint
 if __name__ == '__main__':
-    g.bot.connect(token=config.ACCESS_TOKEN, api_version=config.API_VERSION)
+    g.bot.connect(token=config.ACCESS_TOKEN,
+                  group_id=config.GROUP_ID, api_version=config.API_VERSION)
     g.bot.start_polling(mode=VkLongpollMode.GET_EXTENDED)

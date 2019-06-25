@@ -3,6 +3,7 @@ from vk_api.longpoll import VkEventType, VkMessageFlag
 from . import globals as g
 from .core import middleware as mw
 
+# TODO: do not show empty text
 EDITED_FORMAT = 'Я всё видела!\n{name} изменил{ending} прикреплённое сообщение.\nСтарый текст:\n\n{text}'
 DELETED_FORMAT = 'Не надо так!\n{name} удалил{ending} сообщение.\nСтарый текст:\n\n{text}'
 ENDINGS = ('(а)', 'а', '')
@@ -26,18 +27,18 @@ def message_new(msg, nxt):
 def message_edited(msg, nxt):
     old = g.store.update_message(msg)
     if old:
-        g.bot.send({
-            'peer_id': msg.peer_id,
-            'message': format_msg(EDITED_FORMAT, old),
-            'reply_to': msg.message_id,
-        })
+        g.bot.send(
+            peer_id=msg.peer_id,
+            message=format_msg(EDITED_FORMAT, old),
+            reply_to=msg.message_id,
+        )
 
 
 @mw.flags_set(VkMessageFlag.DELETED_ALL)
 def message_deleted(msg, nxt):
     old = g.store.delete_message(msg.message_id)
     if old:
-        g.bot.send({
-            'peer_id': msg.peer_id,
-            'message': format_msg(DELETED_FORMAT, old),
-        })
+        g.bot.send(
+            peer_id=msg.peer_id,
+            message=format_msg(DELETED_FORMAT, old),
+        )

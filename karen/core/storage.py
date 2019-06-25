@@ -35,7 +35,7 @@ class Storage:
 
         if new:
             self._msgs[msg_id] = new
-            
+
         return old
 
     @synchronized
@@ -65,8 +65,7 @@ class Storage:
 
     # No sync, since it's a private method already called with a lock
     def _fetch_message(self, msg_id):
-        res = g.bot.api.messages.getById(
-            message_ids=msg_id, extended=1, fields='sex')
+        res = g.bot.get_messages(message_ids=msg_id, extended=1, fields='sex')
         print(res)
 
         if res['count']:
