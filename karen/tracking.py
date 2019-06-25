@@ -3,18 +3,23 @@ from vk_api.longpoll import VkEventType, VkMessageFlag
 from . import globals as g
 from .core import middleware as mw
 
-# TODO: do not show empty text
-EDITED_FORMAT = 'Я всё видела!\n{name} изменил{ending} прикреплённое сообщение.\nСтарый текст:\n\n{text}'
-DELETED_FORMAT = 'Не надо так!\n{name} удалил{ending} сообщение.\nСтарый текст:\n\n{text}'
+EDITED_FORMAT = 'Я всё видела!\n{name} изменил{ending} прикреплённое сообщение.'
+DELETED_FORMAT = 'Не надо так!\n{name} удалил{ending} сообщение.'
+OLD_TEXT_FORMAT = '\nСтарый текст:\n\n{text}'
 ENDINGS = ('(а)', 'а', '')
 
 
 def format_msg(fmt, msg):
     user = g.store.get_profile(msg['from_id'])
     name = f"{user['first_name']} {user['last_name']}"
-    text = '> ' + msg['text'].replace('\n', '\n> ')
     ending = ENDINGS[user['sex']]
-    return fmt.format(name=name, ending=ending, text=text)
+
+    res = fmt.format(name=name, ending=ending)
+    if msg['text']:
+        # to visually distinguish the quotation
+        text = '> ' + msg['text'].replace('\n', '\n> ')
+        res += OLD_TEXT_FORMAT.format(text=text)
+    return res
 
 
 @mw.event_type(VkEventType.MESSAGE_NEW)
