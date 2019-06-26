@@ -43,7 +43,10 @@ g.bot.use(
 )
 
 # App entrypoint
-if __name__ == '__main__':
+def start():
     g.bot.connect(token=config.ACCESS_TOKEN,
                   group_id=config.GROUP_ID, api_version=config.API_VERSION)
     g.bot.start_polling(mode=VkLongpollMode.GET_EXTENDED)
+
+if __name__ == '__main__':
+    start()

@@ -1,5 +1,6 @@
 # Python
 __pycache__/
+*.egg-info/
 
 # VS Code
 .vscode/*
@@ -8,3 +9,4 @@ __pycache__/
 
 # Secrets
 .env
+.envrc

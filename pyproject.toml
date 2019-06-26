@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "karen"
+version = "0.1.0"
+description = "vk.com bot preventing people from stealthily editing or deleting messages"
+authors = ["Pavel Andreyev <snowwontmelt@gmail.com>"]
+license = "MIT"
+
+readme = "README.md"
+repository = "https://github.com/snowwm/karen"
+keywords = ["vk", "vk-bot"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+vk_api = "^11.4"
+wrapt = "^1.11"
+
+[tool.poetry.dev-dependencies]
+poetry = "^0.12.16"
+
+[tool.poetry.scripts]
+karen = "karen.app:start"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
