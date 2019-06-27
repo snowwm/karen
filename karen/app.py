@@ -1,8 +1,6 @@
-# TODO: improve imports style
-# TODO: build docker image
+# TODO: better logging
 # TODO: implement commands
 # TODO: implement admin notification
-# TODO: better logging
 # TODO: think about handling attachments
 # FIXME: comment the code (an everlasting problem)
 

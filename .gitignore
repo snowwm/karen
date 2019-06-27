@@ -1,6 +1,7 @@
 # Python
 __pycache__/
 *.egg-info/
+dist/
 
 # VS Code
 .vscode/*
@@ -10,3 +11,4 @@ __pycache__/
 # Secrets
 .env
 .envrc
+*.override*

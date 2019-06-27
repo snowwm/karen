@@ -1,0 +1,3 @@
+# We need just a wheel to install inside the image
+*
+!/dist/*.whl
