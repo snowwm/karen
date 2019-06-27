@@ -14,7 +14,7 @@ class MiddlewareContainer:
         def exec(i):
             nonlocal last_index
             if i <= last_index:
-                raise IndexError('next() called multiple times')
+                raise RuntimeError('next() called multiple times')
             last_index = i
             if i == len(self._mw):
                 return None

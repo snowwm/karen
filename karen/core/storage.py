@@ -1,6 +1,7 @@
 import time
 import copy
 import threading
+import logging
 
 from wrapt import synchronized
 
@@ -8,6 +9,8 @@ from .. import globals as g
 
 CLEANUP_INTERVAL = 3600  # 1 hour
 MESSAGE_TTL = 3600 * 25  # 25 hours
+
+logger = logging.getLogger(__name__)
 
 
 class Storage:
@@ -23,8 +26,9 @@ class Storage:
     @synchronized
     def update_message(self, msg):
         msg_id = msg.message_id
-        old = self._msgs.get(msg_id)
+        logger.info('Updating message #%s', msg_id)
 
+        old = self._msgs.get(msg_id)
         if old:
             new = copy.deepcopy(old)
             new['date'] = msg.timestamp
@@ -40,6 +44,7 @@ class Storage:
 
     @synchronized
     def delete_message(self, msg_id):
+        logger.info('Deleting message #%s', msg_id)
         return self._msgs.pop(msg_id, None)
 
     @synchronized
@@ -48,6 +53,10 @@ class Storage:
 
     @synchronized
     def cleanup(self):
+        logger.warning('Starting cleanup...')
+        logger.warning('Before: %d msgs, %d users',
+                       len(self._msgs), len(self._users))
+
         # clean messages
         now = int(time.time())
         self._msgs = {k: v for k, v in self._msgs.items()
@@ -58,6 +67,9 @@ class Storage:
         self._users = {k: v for k, v in self._users.items()
                        if k in alive_users}
 
+        logger.warning('After: %d msgs, %d users',
+                       len(self._msgs), len(self._users))
+
         # schedule the next iteration
         t = threading.Timer(CLEANUP_INTERVAL, self.cleanup)
         t.daemon = True
@@ -66,21 +78,30 @@ class Storage:
     # No sync, since it's a private method already called with a lock
     def _fetch_message(self, msg_id):
         res = g.bot.get_messages(message_ids=msg_id, extended=1, fields='sex')
-        print(res)
 
-        if res['count']:
+        if not res['count']:
+            logger.warning('Empty fetch response for msg #%s', msg_id)
+        else:
             msg = res['items'][0]
             from_id = msg['from_id']
 
             # ignore special chat actions
             if 'action' in msg:
+                logger.debug('Ignoring action %s', msg['action'])
                 return None
 
             # I don't talk to groups, ever
             # God knows what could happen if two bots felt like wagging their tongues together
             if from_id < 0:
+                logger.debug('Ignoring message from group %s', from_id)
                 return None
 
-            user = res['profiles'][0]
-            self._users[from_id] = user
-            return msg
+            # ensure we have user data
+            if not res.get('profiles'):
+                logger.warning('User profile #%s not fetched', from_id)
+            else:
+                user = res['profiles'][0]
+                assert user['id'] == from_id
+                logger.info('Updating user %s', from_id)
+                self._users[from_id] = user
+                return msg

@@ -1,4 +1,3 @@
-# TODO: better logging
 # TODO: implement commands
 # TODO: implement admin notification
 # TODO: think about handling attachments
@@ -6,19 +5,22 @@
 
 import traceback
 import html
+import logging
 
 from vk_api.longpoll import VkLongpollMode
 
+from . import config  # ensure it's loaded before anything else
 from . import globals as g
-from . import config
 from . import tracking, commands
+
+logger = logging.getLogger(__name__)
 
 
 def handle_errors(event, next):
     try:
         next()
     except Exception:
-        traceback.print_exc()
+        logger.exception('In handler middleware:')
         # self.send({
         #     'user_id': config.ADMIN_ID,
         #     'text': err,
@@ -26,9 +28,8 @@ def handle_errors(event, next):
 
 
 def preprocess_event(event, next):
-    print(event.raw)
     if hasattr(event, 'text'):
-        event.text = html.unescape(event.text)
+        event.text = html.unescape(event.text)  # TODO: send pull to upstream
     next()
 
 
@@ -40,11 +41,16 @@ g.bot.use(
     tracking.message_deleted,
 )
 
-# App entrypoint
+
 def start():
+    """App entrypoint"""
+
+    logger.info('Starting bot')
     g.bot.connect(token=config.ACCESS_TOKEN,
                   group_id=config.GROUP_ID, api_version=config.API_VERSION)
-    g.bot.start_polling(mode=VkLongpollMode.GET_EXTENDED)
+    g.bot.start_polling(
+        mode=int(VkLongpollMode.GET_EXTENDED))  # TODO: send pull
+
 
 if __name__ == '__main__':
     start()

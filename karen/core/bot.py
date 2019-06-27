@@ -1,11 +1,15 @@
 import random
+import logging
 
 from vk_api import VkApi
 from vk_api.longpoll import VkLongPoll
 
 from .middleware import MiddlewareContainer
 
+logger = logging.getLogger(__name__)
 
+
+# TODO: send pull to upstream
 class PatchedLongpoll(VkLongPoll):
     def __init__(self, *args, **kwargs):
         self.group_id = kwargs.pop('group_id', None)
@@ -44,13 +48,16 @@ class Bot(MiddlewareContainer):
         self.group_id = kwargs.pop('group_id', None)
         self.vk = VkApi(**kwargs)
         self.api = self.vk.get_api()
+        logger.info('Connected')
 
     def start_polling(self, **kwargs):
         kwargs.setdefault('mode', 0)
         poll = PatchedLongpoll(self.vk, **kwargs, group_id=self.group_id)
 
+        logger.info('Starting the poll')
         for event in poll.listen():
-            event.bot = self
+            logger.debug('Received event: %s', event.raw)
+            event._bot = self
             self.run_middleware(event)
 
     def send(self, **kwargs):
@@ -61,6 +68,7 @@ class Bot(MiddlewareContainer):
         if self.group_id:
             kwargs.setdefault('group_id', self.group_id)
 
+        logger.debug('Sending message: %s', kwargs)
         return self.api.messages.send(**kwargs)
         # FIXME: it's unclear to me how to send the literal sequence '<br>'
 
@@ -70,4 +78,6 @@ class Bot(MiddlewareContainer):
         if self.group_id:
             kwargs.setdefault('group_id', self.group_id)
 
-        return self.api.messages.getById(**kwargs)
+        res = self.api.messages.getById(**kwargs)
+        logger.debug('Received messages: %s', res)
+        return res
