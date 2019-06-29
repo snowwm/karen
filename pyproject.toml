@@ -13,12 +13,13 @@ keywords = ["vk", "vk-bot"]
 python = "^3.7"
 vk_api = "^11.4"
 wrapt = "^1.11"
+importlib_metadata = "^0.18.0"
 
 [tool.poetry.dev-dependencies]
 poetry = "^0.12.16"
 
 [tool.poetry.scripts]
-karen = "karen.app:start"
+karen = "karen.app:main" # TODO: it doesn't import __main__ when given a package, bug?
 
 [build-system]
 requires = ["poetry>=0.12"]

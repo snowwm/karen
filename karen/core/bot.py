@@ -8,7 +8,6 @@ from .middleware import MiddlewareContainer
 logger = logging.getLogger(__name__)
 
 
-# TODO: send pull to upstream
 class PatchedLongpoll(VkLongPoll):
     def __init__(self, *args, **kwargs):
         self.group_id = kwargs.pop('group_id', None)

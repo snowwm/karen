@@ -1,6 +1,8 @@
-# TODO: implement commands
-# TODO: implement admin notification
-# TODO: think about handling attachments
+# TODO: add commands + some kind of help
+# TODO: add admin notifications
+# TODO: add laconic mode, love4love mode
+# TODO: forgive typos
+# TODO: think about persistence
 # FIXME: comment the code (an everlasting problem)
 
 import traceback
@@ -11,7 +13,7 @@ from vk_api.longpoll import VkLongpollMode
 
 from . import config  # ensure it's loaded before anything else
 from . import globals as g
-from . import tracking, commands
+from . import tracking
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +31,7 @@ def handle_errors(event, next):
 
 def preprocess_event(event, next):
     if hasattr(event, 'text'):
-        event.text = html.unescape(event.text)  # TODO: send pull to upstream
+        event.text = html.unescape(event.text)
     next()
 
 
@@ -42,15 +44,10 @@ g.bot.use(
 )
 
 
-def start():
+def main():
     """App entrypoint"""
 
     logger.info('Starting bot')
     g.bot.connect(token=config.ACCESS_TOKEN,
                   group_id=config.GROUP_ID, api_version=config.API_VERSION)
-    g.bot.start_polling(
-        mode=int(VkLongpollMode.GET_EXTENDED))  # TODO: send pull
-
-
-if __name__ == '__main__':
-    start()
+    g.bot.start_polling(mode=VkLongpollMode.GET_EXTENDED.value)

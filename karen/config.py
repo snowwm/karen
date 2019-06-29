@@ -1,6 +1,8 @@
 ﻿import os
 import logging
 
+import karen
+
 LOGLEVEL = logging.WARNING
 
 if os.getenv('DEBUG'):
@@ -15,6 +17,8 @@ logging.basicConfig(format='%(asctime)s %(levelname)s - %(name)s: %(message)s',
                     datefmt='%d.%m.%Y %H:%M',
                     level=LOGLEVEL)
 logger = logging.getLogger(__name__)
+
+logger.info('Starting karen version %s', karen.__version__)
 
 API_VERSION = os.getenv('KAREN_API_VERSION', '5.95')
 logger.warning('Using API_VERSION %s', API_VERSION)
