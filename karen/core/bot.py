@@ -1,7 +1,6 @@
-import random
 import logging
 
-from vk_api import VkApi
+from vk_api import VkApi, utils
 from vk_api.longpoll import VkLongPoll
 
 from .middleware import MiddlewareContainer
@@ -63,7 +62,7 @@ class Bot(MiddlewareContainer):
     def send(self, **kwargs):
         """messages.send"""
 
-        kwargs.setdefault('random_id', random.randint(-2147483648, 2147483647))
+        kwargs.setdefault('random_id', utils.get_random_id())
 
         if self.group_id:
             kwargs.setdefault('group_id', self.group_id)
