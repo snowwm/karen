@@ -1,7 +1,7 @@
 # send only whitelisted artifacts to docker daemon
 
 *
-!/karen/
+!karen
 !README*
 !LICENSE*
 !pyproject.toml
