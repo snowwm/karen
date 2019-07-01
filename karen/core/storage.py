@@ -85,6 +85,11 @@ class Storage:
             msg = res['items'][0]
             from_id = msg['from_id']
 
+            # ignore own messages
+            if msg['out']:
+                logger.debug('Ignoring message #%s from self', msg['id'])
+                return None
+
             # ignore special chat actions
             if 'action' in msg:
                 logger.debug('Ignoring action %s', msg['action'])
@@ -97,11 +102,12 @@ class Storage:
                 return None
 
             # ensure we have user data
-            if not res.get('profiles'):
-                logger.warning('User profile #%s not fetched', from_id)
-            else:
-                user = res['profiles'][0]
-                assert user['id'] == from_id
-                logger.info('Updating user %s', from_id)
-                self._users[from_id] = user
-                return msg
+            if 'profiles' in res:
+                users = [x for x in res['profiles'] if x['id'] == from_id]
+                if users and users[0]:
+                    logger.info('Updating user %s', from_id)
+                    self._users[from_id] = users[0]
+                    return msg
+
+            logger.warning('User profile #%s not fetched', from_id)
+            return None
