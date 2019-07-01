@@ -1,7 +1,7 @@
-import time
 import copy
-import threading
 import logging
+import threading
+import time
 
 from wrapt import synchronized
 

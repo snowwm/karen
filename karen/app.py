@@ -5,9 +5,9 @@
 # TODO: think about persistence
 # FIXME: comment the code (an everlasting problem)
 
-import traceback
 import html
 import logging
+import traceback
 
 from vk_api.longpoll import VkLongpollMode
 
