@@ -5,7 +5,6 @@
 # TODO: think about persistence
 # FIXME: comment the code (an everlasting problem)
 
-import html
 import logging
 import traceback
 
@@ -29,15 +28,8 @@ def handle_errors(event, next):
         # })
 
 
-def preprocess_event(event, next):
-    if hasattr(event, 'text'):
-        event.text = html.unescape(event.text)
-    next()
-
-
 g.bot.use(
     handle_errors,
-    preprocess_event,
     tracking.message_new,
     tracking.message_edited,
     tracking.message_deleted,

@@ -32,7 +32,7 @@ class Storage:
         if old:
             new = copy.deepcopy(old)
             new['date'] = msg.timestamp
-            new['text'] = msg.text
+            new['text'] = msg.message
             # that's enough for now
         else:
             new = self._fetch_message(msg_id)
