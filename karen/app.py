@@ -50,4 +50,4 @@ def main():
     logger.info('Starting bot')
     g.bot.connect(token=config.ACCESS_TOKEN,
                   group_id=config.GROUP_ID, api_version=config.API_VERSION)
-    g.bot.start_polling(mode=VkLongpollMode.GET_EXTENDED.value)
+    g.bot.start_polling()

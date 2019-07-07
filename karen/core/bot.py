@@ -8,33 +8,6 @@ from .middleware import MiddlewareContainer
 logger = logging.getLogger(__name__)
 
 
-class PatchedLongpoll(VkLongPoll):
-    def __init__(self, *args, **kwargs):
-        self.group_id = kwargs.pop('group_id', None)
-        super().__init__(*args, **kwargs)
-
-    def update_longpoll_server(self, update_ts=True):
-        values = {
-            'lp_version': '3',
-            'need_pts': self.pts
-        }
-
-        if self.group_id:
-            values['group_id'] = self.group_id
-
-        response = self.vk.method('messages.getLongPollServer', values)
-
-        self.key = response['key']
-        self.server = response['server']
-
-        self.url = 'https://' + self.server
-
-        if update_ts:
-            self.ts = response['ts']
-            if self.pts:
-                self.pts = response['pts']
-
-
 class Bot(MiddlewareContainer):
     def __init__(self):
         super().__init__()
@@ -42,15 +15,14 @@ class Bot(MiddlewareContainer):
         self.api = None
         self.group_id = None
 
-    def connect(self, **kwargs):
-        self.group_id = kwargs.pop('group_id', None)
+    def connect(self, group_id=None, **kwargs):
+        self.group_id = group_id
         self.vk = VkApi(**kwargs)
         self.api = self.vk.get_api()
         logger.info('Connected')
 
-    def start_polling(self, **kwargs):
-        kwargs.setdefault('mode', 0)
-        poll = PatchedLongpoll(self.vk, **kwargs, group_id=self.group_id)
+    def start_polling(self, mode=0, **kwargs):
+        poll = VkLongPoll(self.vk, mode=mode, group_id=self.group_id, **kwargs)
 
         logger.info('Starting the poll')
         for event in poll.listen():
@@ -68,7 +40,7 @@ class Bot(MiddlewareContainer):
 
         logger.debug('Sending message: %s', kwargs)
         return self.api.messages.send(**kwargs)
-        # FIXME: it's unclear to me how to send the literal sequence '<br>'
+        # it's unclear to me how to send the literal sequence '<br>'
 
     def get_messages(self, **kwargs):
         """messages.getById"""
