@@ -11,7 +11,7 @@ keywords = ["vk", "vk-bot"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-vk_api = "^11.4"
+vk_api = "^11.5.0"
 wrapt = "^1.11"
 importlib_metadata = "^0.18.0"
 
@@ -20,7 +20,8 @@ poetry = "^1.0.0a0"
 isort = "^4.3"
 
 [tool.poetry.scripts]
-karen = "karen.app:main" # TODO: it doesn't import __main__ when given a package, bug?
+# Would be great if setuptools/pip supported __main__
+karen = "karen.app:main"
 
 [build-system]
 requires = ["poetry>=0.12"]
