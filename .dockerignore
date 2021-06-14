@@ -1,8 +1,0 @@
-# send only whitelisted artifacts to docker daemon
-
-*
-!karen
-!README*
-!LICENSE*
-!pyproject.toml
-!poetry.lock

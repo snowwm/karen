@@ -18,7 +18,7 @@ logging.basicConfig(format='%(asctime)s %(levelname)s - %(name)s: %(message)s',
                     level=LOGLEVEL)
 logger = logging.getLogger(__name__)
 
-logger.warning('Starting karen version %s', karen.__version__)
+logger.warning('Starting karen')
 
 API_VERSION = os.getenv('KAREN_API_VERSION', '5.95')
 logger.warning('Using API_VERSION %s', API_VERSION)
