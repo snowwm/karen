@@ -1,4 +1,3 @@
-from . import app
+from karen.app import App
 
-if __name__ == '__main__':
-    app.main()
+App()

@@ -6,40 +6,47 @@
 # FIXME: comment the code (an everlasting problem)
 
 import logging
-import traceback
+from logging import config as logging_config
+import os
+from typing import Callable, Any
 
-from vk_api.longpoll import VkLongpollMode
-
-from . import config  # ensure it's loaded before anything else
-from . import globals as g
-from . import tracking
+from karen.api import Api
+from karen.models import Event
+from karen.storage import Storage
+from karen.watcher import Watcher
 
 logger = logging.getLogger(__name__)
 
+class App:
+    storage: Storage
+    config: dict[str, Any]
+    api: Api
 
-def handle_errors(event, next):
-    try:
-        next()
-    except Exception:
-        logger.exception('In handler middleware:')
-        # self.send({
-        #     'user_id': config.ADMIN_ID,
-        #     'text': err,
-        # })
+    def __init__(self) -> None:
+        logging.basicConfig(style="{", format="{levelname:3.3} {name}: {message}")
 
+        self.storage = Storage(os.environ.get("KAREN_DB_URL"))
+        self.config = self.storage.get_config()
+        if "logging" in self.config:
+            logging_config.dictConfig(self.config["logging"])
 
-g.bot.use(
-    handle_errors,
-    tracking.message_new,
-    tracking.message_edited,
-    tracking.message_deleted,
-)
+        self._handlers = []
+        Watcher(self).setup()
 
+        self.api = Api(self, self.config["access_token"])
+        logger.info('Starting bot')
+        self.api.poll()
 
-def main():
-    """App entrypoint"""
+    def use(self, *handlers: Callable[[Event], bool]) -> None:
+        """Handlers are executed for each event in the order they were added
+        until one returns a truthy value.
+        """
+        self._handlers.extend(handlers)
 
-    logger.info('Starting bot')
-    g.bot.connect(token=config.ACCESS_TOKEN,
-                  group_id=config.GROUP_ID, api_version=config.API_VERSION)
-    g.bot.start_polling()
+    def handle(self, event: Event) -> None:
+        try:
+            for h in self._handlers:
+                if h(event):
+                    break
+        except Exception:
+            logger.exception("In handlers:")

@@ -3,7 +3,7 @@ description = "vk.com bot that prevents people from stealthily editing or deleti
 authors = [
     {name = "Pavel Andreyev", email = "snowwontmelt@gmail.com"},
 ]
-dependencies = ["vk-api~=11.9", "wrapt~=1.12"]
+dependencies = ["vk-api~=11.9", "pymongo[srv,tls]~=3.11"]
 license = {text = "MIT"}
 requires-python = ">=3.9"
 
