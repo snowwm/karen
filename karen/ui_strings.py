@@ -1,4 +1,4 @@
-from karen.models import User, UserSex, EventType
+from karen.models import EventType, User, UserSex
 
 _edit_fmt = """\
 Я всё видела!
@@ -14,10 +14,11 @@ _type_to_format = {
 }
 
 _sex_to_ending = {
-    UserSex.UNKNOWN: '(а)',
-    UserSex.MALE: '',
-    UserSex.FEMALE: 'а',
+    UserSex.UNKNOWN: "(а)",
+    UserSex.MALE: "",
+    UserSex.FEMALE: "а",
 }
+
 
 def message_changed(event_type: EventType, user: User, have_old_text: bool) -> str:
     msg = _type_to_format[event_type].format(

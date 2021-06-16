@@ -8,7 +8,7 @@
 import logging
 from logging import config as logging_config
 import os
-from typing import Callable, Any
+from typing import Any, Callable
 
 from karen.api import Api
 from karen.models import Event
@@ -17,10 +17,12 @@ from karen.watcher import Watcher
 
 logger = logging.getLogger(__name__)
 
+
 class App:
     storage: Storage
     config: dict[str, Any]
     api: Api
+    _handlers: list
 
     def __init__(self) -> None:
         logging.basicConfig(style="{", format="{levelname:3.3} {name}: {message}")
@@ -34,7 +36,7 @@ class App:
         Watcher(self).setup()
 
         self.api = Api(self, self.config["access_token"])
-        logger.info('Starting bot')
+        logger.info("Starting bot")
         self.api.poll()
 
     def use(self, *handlers: Callable[[Event], bool]) -> None:

@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Any, Optional
 
 from pymongo import MongoClient
 
@@ -17,6 +17,7 @@ class Storage:
         if raw := self._msgs.find_one({"_id": msg_id}):
             raw["id"] = raw.pop("_id")
             return Message.from_dict(raw)
+        return None
 
     def update_message(self, msg: Message) -> None:
         raw = msg.as_dict()

@@ -1,9 +1,9 @@
 import logging
 
-logger = logging.getLogger(__name__)
-
-from karen.models import Event, EventType
 from karen import ui_strings
+from karen.models import Event, EventType
+
+logger = logging.getLogger(__name__)
 
 
 class Watcher:
@@ -15,35 +15,39 @@ class Watcher:
         self._app.use(self.message_changed)
 
     def message_new(self, event: Event) -> bool:
-        if event.type is EventType.MESSAGE_NEW:
-            logger.debug("%s", event)
-            self._app.storage.update_message(event.message)
-            return True
+        if event.type is not EventType.MESSAGE_NEW:
+            return False
+
+        logger.debug("%s", event)
+        self._app.storage.update_message(event.message)
+        return True
 
     def message_changed(self, event: Event) -> bool:
-        if event.type in (EventType.MESSAGE_EDITED, EventType.MESSAGE_DELETED):
-            logger.debug("%s", event)
-            msg = event.message
-            is_edited = event.type is EventType.MESSAGE_EDITED
-            old_msg = self._app.storage.find_message(msg.id)
+        if event.type not in (EventType.MESSAGE_EDITED, EventType.MESSAGE_DELETED):
+            return False
 
-            if is_edited:
-                self._app.storage.update_message(msg)
+        logger.debug("%s", event)
+        msg = event.message
+        is_edited = event.type is EventType.MESSAGE_EDITED
+        old_msg = self._app.storage.find_message(msg.id)
 
-            if old_msg:
-                have_old_text = bool(old_msg.text)
-                user = self._app.api.get_user(msg.from_id)
-                text = ui_strings.message_changed(event.type, user, have_old_text)
+        if is_edited:
+            self._app.storage.update_message(msg)
+
+        if old_msg:
+            have_old_text = bool(old_msg.text)
+            user = self._app.api.get_user(msg.from_id)
+            text = ui_strings.message_changed(event.type, user, have_old_text)
+            self._app.api.send_message(
+                conversation_id=event.conversation_id,
+                text=text,
+                reply_to=msg.id if is_edited else None,
+            )
+
+            if have_old_text:
                 self._app.api.send_message(
                     conversation_id=event.conversation_id,
-                    text=text,
-                    reply_to=msg.id if is_edited else None,
+                    text=old_msg.text,
                 )
 
-                if have_old_text:
-                    self._app.api.send_message(
-                        conversation_id=event.conversation_id,
-                        text=old_msg.text,
-                    )
-
-            return True
+        return True

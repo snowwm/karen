@@ -1,9 +1,10 @@
 import logging
 from typing import Optional
 
-from vk_api.vk_api import VkApiGroup
 from vk_api import utils
-from vk_api.longpoll import VkLongPoll, Event as VkEvent, VkEventType, VkMessageFlag
+from vk_api.longpoll import Event as VkEvent
+from vk_api.longpoll import VkEventType, VkLongPoll, VkMessageFlag
+from vk_api.vk_api import VkApiGroup
 
 from karen.models import Event, EventType, Message, User, UserSex
 
@@ -18,7 +19,7 @@ class Api:
 
     def poll(self) -> None:
         for event in VkLongPoll(self._vk).listen():
-            logger.debug('Received raw event: %s', event.raw)
+            logger.debug("Received raw event: %s", event.raw)
             if event := self._create_event(event):
                 self._app.handle(event)
 
@@ -35,13 +36,17 @@ class Api:
             ev_type = EventType.MESSAGE_NEW
         elif obj.type is VkEventType.MESSAGE_EDIT:
             ev_type = EventType.MESSAGE_EDITED
-        elif obj.type is VkEventType.MESSAGE_FLAGS_REPLACE and (obj.flags & VkMessageFlag.DELETED_ALL):
-            ev_type = EventType.MESSAGE_DELETED
-        elif obj.type is VkEventType.MESSAGE_FLAGS_SET and (obj.mask & VkMessageFlag.DELETED_ALL):
+        elif (
+            obj.type is VkEventType.MESSAGE_FLAGS_REPLACE
+            and obj.flags & VkMessageFlag.DELETED_ALL
+        ) or (
+            obj.type is VkEventType.MESSAGE_FLAGS_SET
+            and obj.mask & VkMessageFlag.DELETED_ALL
+        ):
             ev_type = EventType.MESSAGE_DELETED
         else:
             return None
-        
+
         msg = Message(
             id=obj.message_id,
             from_id=obj.user_id,
@@ -49,11 +54,11 @@ class Api:
             text=getattr(obj, "message", None),
         )
         return Event(ev_type, obj.peer_id, msg)
-                
+
     def send_message(self, conversation_id: int, text: str, **kwargs) -> None:
         kwargs["peer_id"] = conversation_id
         kwargs["message"] = text
-        kwargs.setdefault('random_id', utils.get_random_id())
+        kwargs.setdefault("random_id", utils.get_random_id())
         self._api.messages.send(**kwargs)
 
     def get_user(self, user_id: int) -> Optional[User]:
@@ -66,3 +71,4 @@ class Api:
                 last_name=obj["last_name"],
                 sex=UserSex(obj["sex"]),
             )
+        return None

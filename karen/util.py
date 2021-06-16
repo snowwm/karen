@@ -1,11 +1,11 @@
 import dataclasses
 import inspect
-from typing import Any, Type
+from typing import Any
 
 
 class MyDataclass:
     def __init_subclass__(cls, **kwargs) -> None:
-        super().__init_subclass__(**kwargs)
+        super().__init_subclass__(**kwargs)  # type: ignore
         dataclasses.dataclass(cls)
 
     @classmethod
@@ -44,7 +44,7 @@ class MyDataclass:
             else:
                 return None
 
-        return cls(**res)
+        return cls(**res)  # type: ignore
 
     def as_dict(self) -> dict[str, Any]:
         return dataclasses.asdict(self)
