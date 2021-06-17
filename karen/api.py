@@ -26,10 +26,9 @@ class Api:
     def _create_event(self, obj: VkEvent) -> Optional[Event]:
         """Returns None for events we definitely don't care for."""
 
-        # I don't talk to groups, ever.
-        # God knows what could happen if two bots felt like wagging their tongues together.
-        # This also ensures it's not our own message.
-        if not getattr(obj, "user_id", None):
+        # Note: `from_me` will be always false on MESSAGE_EDITED events
+        # - just assume we never edit our messages.
+        if obj.from_me:
             return None
 
         if obj.type is VkEventType.MESSAGE_NEW:
