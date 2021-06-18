@@ -1,10 +1,3 @@
-# TODO: add commands + some kind of help
-# TODO: add admin notifications
-# TODO: add laconic mode, love4love mode
-# TODO: forgive typos
-# TODO: think about persistence
-# FIXME: comment the code (an everlasting problem)
-
 import logging
 from logging import config as logging_config
 import os
