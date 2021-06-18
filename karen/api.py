@@ -1,6 +1,7 @@
 import logging
-from typing import Optional
+from typing import Callable, Optional
 
+from requests.exceptions import ReadTimeout
 from vk_api import utils
 from vk_api.longpoll import Event as VkEvent
 from vk_api.longpoll import VkEventType, VkLongPoll, VkMessageFlag
@@ -12,16 +13,23 @@ logger = logging.getLogger(__name__)
 
 
 class Api:
-    def __init__(self, app, token: str) -> None:
-        self._app = app
+    def __init__(self, token: str) -> None:
         self._vk = VkApiGroup(token=token)
         self._api = self._vk.get_api()
 
-    def poll(self) -> None:
-        for event in VkLongPoll(self._vk).listen():
-            logger.debug("Received raw event: %s", event.raw)
-            if event := self._create_event(event):
-                self._app.handle(event)
+    def poll(self, handler: Callable[[Event], None]) -> None:
+        poll = VkLongPoll(self._vk)
+        while True:
+            try:
+                events = poll.check()
+            except ReadTimeout:
+                logger.warning("Poll read timeout")
+                continue
+
+            for event in events:
+                logger.debug("Received raw event: %s", event.raw)
+                if event := self._create_event(event):
+                    handler(event)
 
     def _create_event(self, obj: VkEvent) -> Optional[Event]:
         """Returns None for events we definitely don't care for."""

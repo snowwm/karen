@@ -35,9 +35,9 @@ class App:
         self._handlers = []
         Watcher(self).setup()
 
-        self.api = Api(self, self.config["access_token"])
+        self.api = Api(self.config["access_token"])
         logger.info("Starting bot")
-        self.api.poll()
+        self.api.poll(self.handle)
 
     def use(self, *handlers: Callable[[Event], bool]) -> None:
         """Handlers are executed for each event in the order they were added
