@@ -5,7 +5,7 @@ from requests.exceptions import ReadTimeout
 from vk_api import utils
 from vk_api.longpoll import Event as VkEvent
 from vk_api.longpoll import VkEventType, VkLongPoll, VkMessageFlag
-from vk_api.vk_api import VkApiGroup
+from vk_api.vk_api import VkApi
 
 from karen.models import Event, EventType, Message, User, UserSex
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class Api:
     def __init__(self, token: str) -> None:
-        self._vk = VkApiGroup(token=token)
+        self._vk = VkApi(token=token)
         self._api = self._vk.get_api()
 
     def poll(self, handler: Callable[[Event], None]) -> None:
@@ -56,7 +56,7 @@ class Api:
 
         msg = Message(
             id=obj.message_id,
-            from_id=obj.user_id,
+            from_id=getattr(obj, "user_id", None),
             updated_at=getattr(obj, "datetime", None),
             text=getattr(obj, "message", None),
         )

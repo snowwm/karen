@@ -7,7 +7,7 @@ from karen.util import MyDataclass
 
 class Message(MyDataclass):
     id: int
-    from_id: int
+    from_id: Optional[int]
     updated_at: Optional[datetime]
     text: Optional[str]
 

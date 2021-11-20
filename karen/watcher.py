@@ -3,7 +3,7 @@ import logging
 from jellyfish import damerau_levenshtein_distance
 
 from karen import ui_strings
-from karen.models import Event, EventType
+from karen.models import Event, EventType, Message
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class Watcher:
         self._app.storage.update_message(msg)
 
         if old_msg and not self._is_minor_edit(old_msg.text or "", msg.text or ""):
-            self._notify_users(event, old_msg.text, reply_to=msg.id)
+            self._notify_users(event, old_msg, reply_to=msg.id)
 
         return True
 
@@ -45,23 +45,25 @@ class Watcher:
 
         logger.debug("%s", event)
         if old_msg := self._app.storage.find_message(event.message.id):
-            self._notify_users(event, old_msg.text)
+            self._notify_users(event, old_msg)
 
         return True
 
-    def _notify_users(self, event: Event, old_text: str, reply_to: int = None) -> None:
-        user = self._app.api.get_user(event.message.from_id)
-        text = ui_strings.message_changed(event.type, user, bool(old_text))
+    def _notify_users(
+        self, event: Event, old_msg: Message, reply_to: int = None
+    ) -> None:
+        user = self._app.api.get_user(old_msg.from_id)
+        text = ui_strings.message_changed(event.type, user, bool(old_msg.text))
         self._app.api.send_message(
             conversation_id=event.conversation_id,
             text=text,
             reply_to=reply_to,
         )
 
-        if old_text:
+        if old_msg.text:
             self._app.api.send_message(
                 conversation_id=event.conversation_id,
-                text=old_text,
+                text=old_msg.text,
             )
 
     def _is_minor_edit(self, old_text: str, new_text: str) -> bool:
